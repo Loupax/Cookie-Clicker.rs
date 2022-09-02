@@ -8,7 +8,7 @@ fn main() {
         last_update: start_time.clone(),
     };
 
-    // A cursor produces 0.1 cps, 1 per 10 seconds
+    // Each cursor produces 0.1 cps, 1 per 10 seconds
     let cursor = CookieProducer{
         name: "Cursor",
         interval: Duration::new(10, 0),
@@ -16,14 +16,15 @@ fn main() {
         how_many: 1,
     };
 
-    // A grandma produces one cookie per second
+    // Each grandma produces one cps
     let grandma = CookieProducer{
         name: "Grandma",
         interval: Duration::new(1,0),
         last_production: start_time.clone(),
         how_many: 100,
     };
-    let mut producers = Producers{
+    
+    let mut producers = CookieProducers{
         producers: &mut[cursor, grandma],
     };
 
@@ -38,7 +39,7 @@ fn main() {
             state.clicks += 1;
         }
 
-        state.clicks += producers.produce(&state.last_update); //cursor.produce(&state.last_update);
+        state.clicks += producers.produce(&state.last_update);
         engine.print(0,0, format!("Cookies: {}", state.clicks).as_str());
         engine.draw();
 
@@ -46,12 +47,13 @@ fn main() {
             break;
         }
     }
-    println!("Thanks for playing!");
 }
-struct Producers<'slice>{
+
+struct CookieProducers<'slice>{
     producers: &'slice mut [CookieProducer<'slice>],
 }
-impl Producers<'_>{
+
+impl CookieProducers<'_>{
     fn produce(&mut self, when: &SystemTime)->i32{
         let mut total = 0;
         for p in self.producers.iter_mut(){
@@ -60,12 +62,14 @@ impl Producers<'_>{
         return total;
     }
 }
+
 struct CookieProducer<'a>{
     name: &'a str,
     interval: Duration,
     last_production: SystemTime,
     how_many: i32,
 }
+
 impl CookieProducer<'_>{
     fn produce(&mut self, when: &SystemTime)->i32{
        // how many times has the interval passed since 'when'
@@ -82,6 +86,7 @@ impl CookieProducer<'_>{
         return 0;
     }
 }
+
 struct GameState{
     clicks: i32,
     last_update: SystemTime
